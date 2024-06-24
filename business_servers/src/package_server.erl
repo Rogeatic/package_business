@@ -65,7 +65,8 @@ stop() -> gen_server:call(?MODULE, stop).
 %%--------------------------------------------------------------------
 -spec init(term()) -> {ok, term()}|{ok, term(), number()}|ignore |{stop, term()}.
 init([]) ->
-        {ok,replace_up}.
+    io:format("starting up package server~n"),
+    {ok,replace_up}.
 %%--------------------------------------------------------------------
 %% @private
 %% @doc

@@ -29,7 +29,13 @@ init([]) ->
     SupFlags = #{strategy => one_for_all,
                  intensity => 0,
                  period => 1},
-    ChildSpecs = [],
+    ChildSpecs = [#{id => package_server,
+    start => {package_server,start,[]},
+    restart => permanent,
+    shutdown => 2000,
+    type => worker,
+    modules => [package_server]}],
     {ok, {SupFlags, ChildSpecs}}.
+    
 
 %% internal functions
