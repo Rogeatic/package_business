@@ -14,6 +14,15 @@
 %%% API
 %%%===================================================================
 
+transfer_package(Pack_id, Loc_id) -> 
+    gen_server:call(?MODULE, {package_transfered, Pack_id, Loc_id}).
+    
+
+
+
+
+
+
 %%--------------------------------------------------------------------
 %% @doc
 %% Starts the server assuming there is only one server started for 
@@ -66,7 +75,9 @@ stop() -> gen_server:call(?MODULE, stop).
 -spec init(term()) -> {ok, term()}|{ok, term(), number()}|ignore |{stop, term()}.
 init([]) ->
     io:format("starting up package server~n"),
-    {ok,replace_up}.
+    {ok, Db_pid} = riakc_pb_socket:start("24.199.125.13", 8087),
+    io:format("connected to Riak ~p~n", [Db_pid]),
+    {ok, Db_pid}.
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
@@ -81,6 +92,8 @@ init([]) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
+
+%%handle_call({package_transfered})
 handle_call({friends_for,Name_key,Friends_value}, _From, Db_PID) ->
         case Name_key =:= <<"">> of
             true ->
