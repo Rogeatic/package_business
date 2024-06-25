@@ -94,17 +94,44 @@ init([]) ->
                                   {stop, term(), term()}.
 
 %%handle_call({package_transfered})
-handle_call({friends_for,Name_key,Friends_value}, _From, Db_PID) ->
-        case Name_key =:= <<"">> of
-            true ->
-                {reply,{fail,empty_key},Db_PID};
-            _ ->
-                {reply,db_api:put_friends_for(Name_key,Friends_value,Db_PID),Db_PID}
-        end;
-handle_call(stop, _From, _State) ->
-        {stop,normal,
-                replace_stopped,
-          down}. %% setting the server's internal state to down
+% handle_call({package_transfered, Pack_id, Loc_id}, Some_from_pid, Some_Db_PID)->
+%     case Pack_id =:= undefined orelse Loc_id =:= undefined of
+%         true -> {reply, fail, Some_Db_PID};
+%         false ->
+%             case package_server:location_update(Loc_id, Some_Db_PID) of
+%                 {reply, worked, Some_Db_PID} -> {reply, worked, Some_Db_PID};
+%                 {reply, fail, Some_Db_PID} -> {reply, fail, Some_Db_PID}
+%             end;
+%     end;
+% handle_call({friends_for,B_name,B_friends}, _From, Riak_Pid) ->
+
+handle_call({package_transfered, Pack_id, Loc_id}, Some_from_pid, Some_Db_PID) ->
+    case is_integer(Pack_id) == false orelse is_integer(Loc_id) == false of
+    true -> {reply, fail, Some_Db_PID};
+    false ->
+        case riakc_pb_socket:get(<<"packages">>, Pack_id) of
+            ok ->
+                Request=riakc_obj:new(<<"packages">>, Pack_id, Loc_id),
+                {reply,riakc_pb_socket:put(Some_Db_PID, Request),Some_Db_PID};
+            _ -> {reply, fail, Some_Db_PID}
+        end
+    end;
+handle_call(stop, Some_from_pid, _State) ->
+    {stop,normal,
+        server_stopped,
+        down}. %% setting the server's internal state to down
+
+% handle_call({friends_for,Name_key,Friends_value}, _From, Db_PID) ->
+%         case Name_key =:= <<"">> of
+%             true ->
+%                 {reply,{fail,empty_key},Db_PID};
+%             _ ->
+%                 {reply,db_api:put_friends_for(Name_key,Friends_value,Db_PID),Db_PID}
+%         end;
+% handle_call(stop, _From, _State) ->
+%         {stop,normal,
+%                 replace_stopped,
+%           down}. %% setting the server's internal state to down
 
 %%--------------------------------------------------------------------
 %% @private
