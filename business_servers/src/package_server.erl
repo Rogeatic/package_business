@@ -105,15 +105,15 @@ init([]) ->
 %     end;
 % handle_call({friends_for,B_name,B_friends}, _From, Riak_Pid) ->
 
-% UPDATING LOCATION
+% UPDATING LOCATION ID
 handle_call({package_transfered, Pack_id, Loc_id}, Some_from_pid, Some_Db_PID) ->
     case is_integer(Pack_id) == false orelse is_integer(Loc_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         case riakc_pb_socket:get(<<"packages">>, Pack_id) of
             {ok, _} ->
-                Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
-                case riakc_pb_socket:put(Some_Db_PID, Request) of 
+                Package=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
+                case riakc_pb_socket:put(Some_Db_PID, Package) of 
                     ok -> {reply, worked, Some_Db_PID};
                     _ -> {reply, fail, Some_Db_PID}
                 end;
@@ -145,7 +145,7 @@ handle_call({location_request, Pack_id}, Some_from_pid, Some_Db_PID) ->
         case riakc_pb_socket:get(<<"packages">>, Pack_id) of
             {ok, Package} ->
                 [Loc_id, _] = riakc_obj:get_values(Package),
-                case riakc_pb_socket:get(<<"locations">>, Pack_id) of
+                case riakc_pb_socket:get(<<"locations">>, Loc_id) of
                 {ok, Loc_obj} ->
                     [Long, Lat] = riakc_obj:get_values(Loc_obj),
                     {reply, {worked, Long, Lat}, Some_Db_PID};
@@ -155,7 +155,23 @@ handle_call({location_request, Pack_id}, Some_from_pid, Some_Db_PID) ->
         end
     end;
 
-% KILL SERVER
+% UPDATE LOCATION
+handle_call({location_update, Loc_id, Long, Lat}, Some_from_pid, Some_Db_PID) ->
+    case is_integer(Loc_id) == false orelse is_float(Long) == false  orelse is_float(Lat) == false of
+    true -> {reply, fail, Some_Db_PID};
+    false ->
+        case riakc_pb_socket:get(<<"locations">>, Loc_id) of
+        {ok, _} ->
+            Location=riakc_obj:new(<<"locations">>, Loc_id, {Long, Lat}),
+            case riakc_pb_socket:put(Some_Db_PID, Location) of 
+                ok -> {reply, worked, Some_Db_PID};
+                _ -> {reply, fail, Some_Db_PID}
+            end;
+        _ -> {reply, fail, Some_Db_PID}
+        end
+    end;
+
+    % KILL SERVER
 handle_call(stop, Some_from_pid, _State) ->
     {stop,normal,
         server_stopped,
