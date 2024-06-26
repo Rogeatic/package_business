@@ -78,13 +78,8 @@ init([]) ->
     {ok, Db_pid} = riakc_pb_socket:start("24.199.125.13", 8087),
     io:format("connected to Riak ~p~n", [Db_pid]),
     {ok, Db_pid}.
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% Handling call messages
-%%
-%% @end
-%%--------------------------------------------------------------------
+
+% Handling call messages
 -spec handle_call(Request::term(), From::pid(), State::term()) ->
                                   {reply, term(), term()} |
                                   {reply, term(), term(), integer()} |
@@ -92,18 +87,6 @@ init([]) ->
                                   {noreply, term(), integer()} |
                                   {stop, term(), term(), integer()} | 
                                   {stop, term(), term()}.
-
-%%handle_call({package_transfered})
-% handle_call({package_transfered, Pack_id, Loc_id}, Some_from_pid, Some_Db_PID)->
-%     case Pack_id =:= undefined orelse Loc_id =:= undefined of
-%         true -> {reply, fail, Some_Db_PID};
-%         false ->
-%             case package_server:location_update(Loc_id, Some_Db_PID) of
-%                 {reply, worked, Some_Db_PID} -> {reply, worked, Some_Db_PID};
-%                 {reply, fail, Some_Db_PID} -> {reply, fail, Some_Db_PID}
-%             end;
-%     end;
-% handle_call({friends_for,B_name,B_friends}, _From, Riak_Pid) ->
 
 % UPDATING LOCATION ID
 handle_call({package_transfered, Pack_id, Loc_id}, Some_from_pid, Some_Db_PID) ->
@@ -171,11 +154,11 @@ handle_call({location_update, Loc_id, Long, Lat}, Some_from_pid, Some_Db_PID) ->
         end
     end;
 
-    % KILL SERVER
+% KILL SERVER % setting the server's internal state to down
 handle_call(stop, Some_from_pid, _State) ->
     {stop,normal,
         server_stopped,
-        down}. %% setting the server's internal state to down
+        down}. 
 
 % handle_call({friends_for,Name_key,Friends_value}, _From, Db_PID) ->
 %         case Name_key =:= <<"">> of
@@ -189,60 +172,32 @@ handle_call(stop, Some_from_pid, _State) ->
 %                 replace_stopped,
 %           down}. %% setting the server's internal state to down
 
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% Handling cast messages
-%%
-%% @end
-%%--------------------------------------------------------------------
+% HANDLING CAST MESSAGE
 -spec handle_cast(Msg::term(), State::term()) -> {noreply, term()} |
                                   {noreply, term(), integer()} |
                                   {stop, term(), term()}.
 handle_cast(_Msg, State) ->
     {noreply, State}.
     
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% Handling all non call/cast messages
-%%
-%% @end
+% Handling all non call/cast messages
 -spec handle_info(Info::term(), State::term()) -> {noreply, term()} |
                                    {noreply, term(), integer()} |
                                    {stop, term(), term()}.
 handle_info(_Info, State) ->
     {noreply, State}.
 
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
 %% This function is called by a gen_server when it is about to
 %% terminate. It should be the opposite of Module:init/1 and do any
 %% necessary cleaning up. When it returns, the gen_server terminates
 %% with Reason. The return value is ignored.
-%%
-%% @end
-%%--------------------------------------------------------------------
 -spec terminate(Reason::term(), term()) -> term().
 terminate(_Reason, _State) ->
     ok.
     
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% Convert process state when code is changed
-%%
-%% @end
-%%--------------------------------------------------------------------
+% CONVERT PROCESS STATE WHEN CODE CHANGES
 -spec code_change(term(), term(), term()) -> {ok, term()}.
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-    
-%%%===================================================================
-%%% Internal functions
-%%%===================================================================
-
 
 
 -ifdef(EUNIT).
