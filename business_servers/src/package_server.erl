@@ -105,17 +105,57 @@ init([]) ->
 %     end;
 % handle_call({friends_for,B_name,B_friends}, _From, Riak_Pid) ->
 
+% UPDATING LOCATION
 handle_call({package_transfered, Pack_id, Loc_id}, Some_from_pid, Some_Db_PID) ->
     case is_integer(Pack_id) == false orelse is_integer(Loc_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         case riakc_pb_socket:get(<<"packages">>, Pack_id) of
-            ok ->
-                Request=riakc_obj:new(<<"packages">>, Pack_id, Loc_id),
-                {reply,riakc_pb_socket:put(Some_Db_PID, Request),Some_Db_PID};
+            {ok, _} ->
+                Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
+                case riakc_pb_socket:put(Some_Db_PID, Request) of 
+                    ok -> {reply, worked, Some_Db_PID};
+                    _ -> {reply, fail, Some_Db_PID}
+                end;
             _ -> {reply, fail, Some_Db_PID}
         end
     end;
+% UPDATING AS DELIVERED
+handle_call({delivered, Pack_id}, Some_from_pid, Some_Db_PID) ->
+    case is_integer(Pack_id) == false of
+    true -> {reply, fail, Some_Db_PID};
+    false ->
+        case riakc_pb_socket:get(<<"packages">>, Pack_id) of
+            {ok, Package} ->
+                [Loc_id, _] = riakc_obj:get_values(Package),
+                Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, true}),
+                case riakc_pb_socket:put(Some_Db_PID, Request) of 
+                    ok -> {reply, worked, Some_Db_PID};
+                    _ -> {reply, fail, Some_Db_PID}
+                end;
+            _ -> {reply, fail, Some_Db_PID}
+        end
+    end;
+
+% GET LOCATION
+handle_call({location_request, Pack_id}, Some_from_pid, Some_Db_PID) ->
+    case is_integer(Pack_id) == false of
+    true -> {reply, fail, Some_Db_PID};
+    false ->
+        case riakc_pb_socket:get(<<"packages">>, Pack_id) of
+            {ok, Package} ->
+                [Loc_id, _] = riakc_obj:get_values(Package),
+                case riakc_pb_socket:get(<<"locations">>, Pack_id) of
+                {ok, Loc_obj} ->
+                    [Long, Lat] = riakc_obj:get_values(Loc_obj),
+                    {reply, {worked, Long, Lat}, Some_Db_PID};
+                _ -> {reply, fail, Some_Db_PID}
+                end;
+            _ -> {reply, fail, Some_Db_PID}
+        end
+    end;
+
+% KILL SERVER
 handle_call(stop, Some_from_pid, _State) ->
     {stop,normal,
         server_stopped,
