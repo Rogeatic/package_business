@@ -211,17 +211,27 @@ package_transfer_test_()->
 delivered_test_()->
     {setup,
     fun() -> %this setup fun is run once befor the tests are run.
-       meck:new(db_api),
-       meck:expect(db_api, put_friends_for, fun(Key,Names,PID) -> worked end)
-       
-    end,
+        meck:new(db_api),
+        meck:expect(db_api, delivered, fun(Pack_id, Some_Db_PID)->
+            case Pack_id of
+                bad_id -> fail;
+                3 -> fail;
+                _ -> 
+                case Some_Db_PID of
+                    bad_Db_PID -> fail;
+                    _ -> worked
+                end
+            end
+        end)
+        end,
     fun(_) ->%This is the teardown fun.
        meck:unload(db_api)
     end,
     [%Delievered Test
-    ?_assertEqual({reply, worked, some_Db_PID}, package_server:handle_call({delivered, pack_id}, some_from_pid, some_Db_PID)),
+    ?_assertEqual({reply, worked, some_Db_PID}, package_server:handle_call({delivered, 100}, some_from_pid, some_Db_PID)),
+    ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({delivered, 3}, some_from_pid, some_Db_PID)),
     ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({delivered, bad_id}, some_from_pid, some_Db_PID)),
-    ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({delivered, undefined}, some_from_pid, some_Db_PID))
+    ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({delivered, 100}, some_from_pid, bad_Db_PID))
 ]}.
 
 request_test_()->
@@ -235,7 +245,6 @@ request_test_()->
                 _ -> {worked, 123.0, 456.0}
             end
         end)
-       
     end,
     fun(_) ->%This is the teardown fun.
        meck:unload(db_api)
@@ -250,40 +259,79 @@ location_test_()->
     {setup,
     fun() -> %this setup function
         meck:new(db_api),
-        meck:expect(db_api, put_friends_for, fun(Key,Names,PID) -> worked end)
+        meck:expect(db_api, update_location, fun(Loc_id, Long, Lat, Some_Db_PID) -> 
+            case Loc_id of
+                bad_loc_id -> fail;
+                3 -> fail;
+                _ -> 
+                    case Long of
+                        bad_long -> fail;
+                        3.0 -> fail;
+                        _ ->
+                            case Lat of
+                                bad_lat -> fail;
+                                3.0 -> fail;
+                                _ -> worked
+                            end
+                    end
+            end
+        end)
         
     end,
     fun(_) ->%This is the teardown fun.
         meck:unload(db_api)
     end,
     [%Update Test
-        ?_assertEqual({reply, worked, some_Db_PID}, package_server:handle_call({location_update, loc_id, 123.0, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, 123.0, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, bad_id, 456.0},some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, 123.0, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, bad_id, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, 123.0, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, bad_id, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, bad_id, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, 123.0, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, undefined, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, 123.0, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, undefined, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, 123.0, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, undefined, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, undefined, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, undefined, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, 123.0, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, bad_id, 456.0}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, bad_id, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, 123.0, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, loc_id, undefined, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, undefined, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, bad_id, undefined}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, undefined, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, undefined, bad_id, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, undefined, bad_id}, some_from_pid, some_Db_PID)),
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_id, bad_id, undefined}, some_from_pid, some_Db_PID))
+        %BAD LOC_ID
+        ?_assertEqual({reply, worked, some_Db_PID}, package_server:handle_call({location_update, 100, 123.0, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 123.0, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 123.0, 456.0}, some_from_pid, some_Db_PID)),
+        %BAD LONG
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 123, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, bad_long, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 3.0, 456.0}, some_from_pid, some_Db_PID)),
+        %BAD LAT
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 123.0, 456}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 123.0, bad_lat}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 123.0, 3.0}, some_from_pid, some_Db_PID)),
+
+        %BAD LAT AND LONG
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 3.0, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, bad_long, bad_lat}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 123, 123}, some_from_pid, some_Db_PID)),    
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 3.0, 123}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 3.0, bad_lat}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, 123, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 100, bad_long, 3.0}, some_from_pid, some_Db_PID)),
+
+        %BAD LOC_ID AND LONG
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 3.0, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 123, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, bad_long, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 3.0, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 123, 456.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, bad_long, 456.0}, some_from_pid, some_Db_PID)),
+
+        %BAD LOC_ID AND LAT
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 123.0, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 123.0, 123}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 123.0, bad_lat}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 123.0, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 123.0, 123}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 123.0, bad_lat}, some_from_pid, some_Db_PID)),
+
+        %BAD THOUGHTS
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 3.0, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 123, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, bad_long, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 3.0, 123}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, bad_loc_id, 3.0, bad_lat}, some_from_pid, some_Db_PID)),
+
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 3.0, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 123, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, bad_long, 3.0}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 3.0, 123}, some_from_pid, some_Db_PID)),
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({location_update, 3, 3.0, bad_lat}, some_from_pid, some_Db_PID))
 ]}.
 
    
