@@ -3,7 +3,7 @@
 
 
 %% API
--export([start/0,start/3,stop/0]).
+-export([start/0,start/3,stop/0, transfer_package/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
