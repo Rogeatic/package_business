@@ -15,7 +15,7 @@
 %%%===================================================================
 
 transfer_package(Pack_id, Loc_id) -> 
-    gen_server:call(?MODULE, {package_transfered, Pack_id, Loc_id}).
+    gen_server:call(?MODULE, {package_transferred, Pack_id, Loc_id}).
     
 
 
@@ -89,7 +89,7 @@ init([]) ->
                                   {stop, term(), term()}.
 
 % UPDATING LOCATION ID
-handle_call({package_transfered, Pack_id, Loc_id}, _Some_from_pid, Some_Db_PID) ->
+handle_call({package_transferred, Pack_id, Loc_id}, _Some_from_pid, Some_Db_PID) ->
     case is_integer(Pack_id) == false orelse is_integer(Loc_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
@@ -195,17 +195,17 @@ package_transfer_test_()->
         meck:unload(db_api)
     end,
     [%Package Transfer Test
-        ?_assertEqual({reply, worked, some_Db_PID}, package_server:handle_call({package_transfered, 99999, 111}, some_from_pid, some_Db_PID)), % happy path
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transfered, bad_id, 111}, some_from_pid, some_Db_PID)), % non-int pack_id
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transfered, 3, 111}, some_from_pid, some_Db_PID)), % bad pack_id
-        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transfered, 99999, 111}, some_from_pid, bad_Db_PID)), % bad db_pid
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transfered, 99999, string}, some_from_pid, some_Db_PID)), % non-int loc_id
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transfered, string, string}, some_from_pid, some_Db_PID)), % non-int pack+loc_id
-        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transfered, 3, string}, some_from_pid, some_Db_PID)), % bad Pack_id + non-int loc_id
-        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transfered, 99999, string}, some_from_pid, bad_Db_PID)), % nonint loc_id + bad db_pid
-        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transfered, 3, 111}, some_from_pid, bad_Db_PID)), % bad package_id + bad db_pid
-        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transfered, string, 111}, some_from_pid, bad_Db_PID)), % non-int pack_id + bad db_pid
-        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transfered, bad, bad}, some_from_pid, bad_Db_PID)) % bad thoughts
+        ?_assertEqual({reply, worked, some_Db_PID}, package_server:handle_call({package_transferred, 99999, 111}, some_from_pid, some_Db_PID)), % happy path
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transferred, bad_id, 111}, some_from_pid, some_Db_PID)), % non-int pack_id
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transferred, 3, 111}, some_from_pid, some_Db_PID)), % bad pack_id
+        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transferred, 99999, 111}, some_from_pid, bad_Db_PID)), % bad db_pid
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transferred, 99999, string}, some_from_pid, some_Db_PID)), % non-int loc_id
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transferred, string, string}, some_from_pid, some_Db_PID)), % non-int pack+loc_id
+        ?_assertEqual({reply, fail, some_Db_PID}, package_server:handle_call({package_transferred, 3, string}, some_from_pid, some_Db_PID)), % bad Pack_id + non-int loc_id
+        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transferred, 99999, string}, some_from_pid, bad_Db_PID)), % nonint loc_id + bad db_pid
+        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transferred, 3, 111}, some_from_pid, bad_Db_PID)), % bad package_id + bad db_pid
+        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transferred, string, 111}, some_from_pid, bad_Db_PID)), % non-int pack_id + bad db_pid
+        ?_assertEqual({reply, fail, bad_Db_PID}, package_server:handle_call({package_transferred, bad, bad}, some_from_pid, bad_Db_PID)) % bad thoughts
     ]}.
   
 delivered_test_()->

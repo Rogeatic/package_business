@@ -2,13 +2,9 @@
 -export([store_location_id/3, delivered/2, get_location/1, update_location/4, initialize_connection/2]).
 
 store_location_id(Pack_id, Loc_id, Some_Db_PID)->
-    case riakc_pb_socket:get(<<"packages">>, Pack_id) of
-        {ok, _} ->
-            Package=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
-            case riakc_pb_socket:put(Some_Db_PID, Package) of 
-                ok -> worked;
-                _ -> fail
-            end;
+    Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
+    case riakc_pb_socket:put(Some_Db_PID, Request) of 
+        ok -> worked;
         _ -> fail
     end.
 
@@ -38,13 +34,9 @@ get_location(Pack_id)->
     end.
 
 update_location(Loc_id, Long, Lat, Some_Db_PID)->
-    case riakc_pb_socket:get(<<"locations">>, Loc_id) of
-        {ok, _} ->
-            Location=riakc_obj:new(<<"locations">>, Loc_id, {Long, Lat}),
-            case riakc_pb_socket:put(Some_Db_PID, Location) of 
-                ok -> worked;
-                _ -> fail
-            end;
+    Request=riakc_obj:new(<<"locations">>, Loc_id, {Long, Lat}),
+    case riakc_pb_socket:put(Some_Db_PID, Request) of
+        ok -> worked;
         _ -> fail
     end.
 
