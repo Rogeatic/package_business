@@ -7,7 +7,7 @@
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3]).
+         terminate/2, code_change/3, update_location/3]).
 
 
 %%%===================================================================
@@ -17,7 +17,8 @@
 transfer_package(Pack_id, Loc_id) -> 
     gen_server:call(?MODULE, {package_transferred, Pack_id, Loc_id}).
     
-
+update_location(Loc_id, Long, Lat) -> 
+    gen_server:call(?MODULE, {location_update, Loc_id, Long, Lat}).
 
 
 
