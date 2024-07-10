@@ -7,7 +7,7 @@
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3, update_location/3]).
+         terminate/2, code_change/3, update_location/3, location_request/1]).
 
 
 %%%===================================================================
@@ -20,8 +20,9 @@ transfer_package(Pack_id, Loc_id) ->
 update_location(Loc_id, Long, Lat) -> 
     gen_server:call(?MODULE, {location_update, Loc_id, Long, Lat}).
 
-
-
+location_request(Loc_id) -> 
+    gen_server:call(?MODULE, {location_request, Loc_id}).
+    
 
 
 %%--------------------------------------------------------------------
@@ -91,14 +92,14 @@ init([]) ->
 
 % UPDATING LOCATION ID
 handle_call({package_transferred, Pack_id, Loc_id}, _Some_from_pid, Some_Db_PID) ->
-    case is_integer(Pack_id) == false orelse is_integer(Loc_id) == false of
+    case is_binary(Pack_id) == false orelse is_binary(Loc_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         {reply, db_api:store_location_id(Pack_id, Loc_id, Some_Db_PID), Some_Db_PID}
     end;
 % UPDATING AS DELIVERED
 handle_call({delivered, Pack_id}, _Some_from_pid, Some_Db_PID) ->
-    case is_integer(Pack_id) == false of
+    case is_binary(Pack_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         {reply, db_api:delivered(Pack_id, Some_Db_PID), Some_Db_PID}
@@ -106,7 +107,7 @@ handle_call({delivered, Pack_id}, _Some_from_pid, Some_Db_PID) ->
 
 % GET LOCATION
 handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
-    case is_integer(Pack_id) == false of
+    case is_binary(Pack_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         {reply, db_api:get_location(Pack_id), Some_Db_PID}
@@ -114,7 +115,7 @@ handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
 
 % UPDATE LOCATION
 handle_call({location_update, Loc_id, Long, Lat}, _Some_from_pid, Some_Db_PID) ->
-    case is_integer(Loc_id) == false orelse is_float(Long) == false  orelse is_float(Lat) == false of
+    case is_binary(Loc_id) == false orelse is_float(Long) == false  orelse is_float(Lat) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         {reply, db_api:update_location(Loc_id, Long, Lat, Some_Db_PID), Some_Db_PID}
