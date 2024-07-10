@@ -21,21 +21,16 @@ delivered(Pack_id, Some_Db_PID)->
     end.
 
 get_location(Pack_id, Some_Db_PID)->
-    io:format("2"),
     case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Package} ->
-            io:format("test 3"),
-            io:format(riakc_obj:get_values(Package)),
             [Loc_id, _] = riakc_obj:get_values(Package),
             case riakc_pb_socket:get(<<"locations">>, Loc_id) of
             {ok, Loc_obj} ->
                 [Long, Lat] = riakc_obj:get_values(Loc_obj),
-                io:format(riakc_obj:get_values(Loc_obj)),
                 {worked, Long, Lat};
             _ -> fail
             end;
         _ -> 
-            io:format("test 3b fail"),
             fail
     end.
 

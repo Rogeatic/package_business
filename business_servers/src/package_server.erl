@@ -7,7 +7,7 @@
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3, update_location/3, location_request/1]).
+         terminate/2, code_change/3, update_location/3, location_request/1, delivered/1]).
 
 
 %%%===================================================================
@@ -23,7 +23,9 @@ update_location(Loc_id, Long, Lat) ->
 location_request(Pack_id) ->
     gen_server:call(?MODULE, {location_request, Pack_id}).
     
-
+delivered(Pack_id) ->
+    gen_server:call(?MODULE, {delivered, Pack_id}).
+        
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -107,7 +109,6 @@ handle_call({delivered, Pack_id}, _Some_from_pid, Some_Db_PID) ->
 
 % GET LOCATION
 handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
-    io:format("1"),
     case is_binary(Pack_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
