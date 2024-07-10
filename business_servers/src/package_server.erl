@@ -20,8 +20,8 @@ transfer_package(Pack_id, Loc_id) ->
 update_location(Loc_id, Long, Lat) -> 
     gen_server:call(?MODULE, {location_update, Loc_id, Long, Lat}).
 
-location_request(Loc_id) -> 
-    gen_server:call(?MODULE, {location_request, Loc_id}).
+location_request(Pack_id) ->
+    gen_server:call(?MODULE, {location_request, Pack_id}).
     
 
 
@@ -115,7 +115,7 @@ handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
 
 % UPDATE LOCATION
 handle_call({location_update, Loc_id, Long, Lat}, _Some_from_pid, Some_Db_PID) ->
-    case is_binary(Loc_id) == false orelse is_float(Long) == false  orelse is_float(Lat) == false of
+    case is_binary(Loc_id) == false orelse is_float(Long) == false orelse is_float(Lat) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
         {reply, db_api:update_location(Loc_id, Long, Lat, Some_Db_PID), Some_Db_PID}

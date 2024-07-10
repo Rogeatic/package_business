@@ -23,10 +23,12 @@ delivered(Pack_id, Some_Db_PID)->
 get_location(Pack_id)->
     case riakc_pb_socket:get(<<"packages">>, Pack_id) of
         {ok, Package} ->
+            io:format(riakc_obj:get_values(Package)),
             [Loc_id, _] = riakc_obj:get_values(Package),
             case riakc_pb_socket:get(<<"locations">>, Loc_id) of
             {ok, Loc_obj} ->
                 [Long, Lat] = riakc_obj:get_values(Loc_obj),
+                io:format(riakc_obj:get_values(Loc_obj)),
                 {worked, Long, Lat};
             _ -> fail
             end;
