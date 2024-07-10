@@ -21,6 +21,7 @@ delivered(Pack_id, Some_Db_PID)->
     end.
 
 get_location(Pack_id)->
+    io:format("2"),
     case riakc_pb_socket:get(<<"packages">>, Pack_id) of
         {ok, Package} ->
             io:format(riakc_obj:get_values(Package)),

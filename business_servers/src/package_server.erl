@@ -21,6 +21,7 @@ update_location(Loc_id, Long, Lat) ->
     gen_server:call(?MODULE, {location_update, Loc_id, Long, Lat}).
 
 location_request(Pack_id) ->
+    io:format("0"),
     gen_server:call(?MODULE, {location_request, Pack_id}).
     
 
@@ -107,6 +108,7 @@ handle_call({delivered, Pack_id}, _Some_from_pid, Some_Db_PID) ->
 
 % GET LOCATION
 handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
+    io:format("1"),
     case is_binary(Pack_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
