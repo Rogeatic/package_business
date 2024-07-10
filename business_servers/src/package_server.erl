@@ -111,7 +111,7 @@ handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
     case is_binary(Pack_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
-        {reply, db_api:get_location(Pack_id), Some_Db_PID}
+        {reply, db_api:get_location(Pack_id, Some_Db_PID), Some_Db_PID}
     end;
 
 % UPDATE LOCATION

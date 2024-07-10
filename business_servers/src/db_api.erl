@@ -1,5 +1,5 @@
 -module(db_api).
--export([store_location_id/3, delivered/2, get_location/1, update_location/4, initialize_connection/2]).
+-export([store_location_id/3, delivered/2, get_location/2, update_location/4, initialize_connection/2]).
 
 store_location_id(Pack_id, Loc_id, Some_Db_PID)->
     Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
@@ -9,7 +9,7 @@ store_location_id(Pack_id, Loc_id, Some_Db_PID)->
     end.
 
 delivered(Pack_id, Some_Db_PID)->
-    case riakc_pb_socket:get(<<"packages">>, Pack_id) of
+    case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Package} ->
             [Loc_id, _] = riakc_obj:get_values(Package),
             Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, true}),
@@ -20,9 +20,9 @@ delivered(Pack_id, Some_Db_PID)->
         _ -> fail
     end.
 
-get_location(Pack_id)->
+get_location(Pack_id, Some_Db_PID)->
     io:format("2"),
-    case riakc_pb_socket:get(<<"packages">>, Pack_id) of
+    case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Package} ->
             io:format("test 3"),
             io:format(riakc_obj:get_values(Package)),
