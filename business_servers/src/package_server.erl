@@ -21,7 +21,6 @@ update_location(Loc_id, Long, Lat) ->
     gen_server:call(?MODULE, {location_update, Loc_id, Long, Lat}).
 
 location_request(Pack_id) ->
-    io:format("0"),
     gen_server:call(?MODULE, {location_request, Pack_id}).
     
 

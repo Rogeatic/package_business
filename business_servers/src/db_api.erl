@@ -24,6 +24,7 @@ get_location(Pack_id)->
     io:format("2"),
     case riakc_pb_socket:get(<<"packages">>, Pack_id) of
         {ok, Package} ->
+            io:format("test 3"),
             io:format(riakc_obj:get_values(Package)),
             [Loc_id, _] = riakc_obj:get_values(Package),
             case riakc_pb_socket:get(<<"locations">>, Loc_id) of
@@ -33,7 +34,9 @@ get_location(Pack_id)->
                 {worked, Long, Lat};
             _ -> fail
             end;
-        _ -> fail
+        _ -> 
+            io:format("test 3b fail"),
+            fail
     end.
 
 update_location(Loc_id, Long, Lat, Some_Db_PID)->
