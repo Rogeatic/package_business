@@ -9,8 +9,10 @@ store_location_id(Pack_id, Loc_id, Some_Db_PID)->
     end.
 
 delivered(Pack_id, Some_Db_PID)->
+    io:format(Pack_id),
     case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Package} ->
+            io:format(Package),
             [Loc_id, _] = riakc_obj:get_value(Package),
             io:format(Loc_id),
             Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, true}),
