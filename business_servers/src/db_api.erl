@@ -12,6 +12,7 @@ delivered(Pack_id, Some_Db_PID)->
     case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Package} ->
             [Loc_id, _] = riakc_obj:get_value(Package),
+            io:format(Loc_id),
             Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, true}),
             case riakc_pb_socket:put(Some_Db_PID, Request) of 
                 ok -> worked;
