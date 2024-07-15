@@ -2,6 +2,7 @@
 -export([store_location_id/3, delivered/2, get_location/2, update_location/4, initialize_connection/2]).
 
 store_location_id(Pack_id, Loc_id, Some_Db_PID)->
+    io:format("PackID: ~p Location:~p~n", [Pack_id, Loc_id]),
     Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
     case riakc_pb_socket:put(Some_Db_PID, Request) of 
         ok -> worked;

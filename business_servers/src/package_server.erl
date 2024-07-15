@@ -97,7 +97,9 @@ handle_call({package_transferred, Pack_id, Loc_id}, _Some_from_pid, Some_Db_PID)
     case is_binary(Pack_id) == false orelse is_binary(Loc_id) == false of
     true -> {reply, fail, Some_Db_PID};
     false ->
-        {reply, db_api:store_location_id(Pack_id, Loc_id, Some_Db_PID), Some_Db_PID}
+        Result = db_api:store_location_id(Pack_id, Loc_id, Some_Db_PID),
+        io:format("Handle Call: ~p~n", [Result]),
+        {reply, Result, Some_Db_PID}
     end;
 % UPDATING AS DELIVERED
 handle_call({delivered, Pack_id}, _Some_from_pid, Some_Db_PID) ->
