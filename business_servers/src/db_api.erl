@@ -2,13 +2,9 @@
 -export([store_location_id/3, delivered/2, get_location/2, update_location/4, initialize_connection/2]).
 
 store_location_id(Pack_id, Loc_id, Some_Db_PID)->
-    io:format("PackID: ~p Location:~p~n", [Pack_id, Loc_id]),
     Request=riakc_obj:new(<<"packages">>, Pack_id, {Loc_id, false}),
-    io:format("Request:~p~n", [Request]),
     case riakc_pb_socket:put(Some_Db_PID, Request) of 
         ok ->
-            {_, Real} = riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id),
-            io:format("Get Value StoreLoc:~p~n", [binary_to_term(riakc_obj:get_value(Real))]),
             worked;
         _ -> fail
     end.
@@ -29,17 +25,11 @@ delivered(Pack_id, Some_Db_PID)->
     end.
 
 get_location(Pack_id, Some_Db_PID)->
-    io:format("PackID: ~p~n", [Pack_id]),
-    io:format("Get Package Location: ~p~n", [riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id)]),
     case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Fetched} ->
-            io:format("Fetched: ~p~n", [Fetched]),
             {Location_id,_} = binary_to_term(riakc_obj:get_value(Fetched)),
-            io:format("Location ID: ~p~n", [Location_id]),
-            io:format(" Get Location Bucket: ~p~n", [riakc_pb_socket:get(Some_Db_PID, <<"locations">>, Location_id)]),
             case riakc_pb_socket:get(Some_Db_PID, <<"locations">>, Location_id) of
             {ok, Loc_obj} ->
-                io:format("Lat Long: ~p~n", [binary_to_term(riakc_obj:get_value(Loc_obj))]),
                 {Long, Lat} = binary_to_term(riakc_obj:get_value(Loc_obj)),
                 {worked, Long, Lat};
             _ -> fail
