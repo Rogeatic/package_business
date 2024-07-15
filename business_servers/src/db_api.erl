@@ -30,6 +30,7 @@ delivered(Pack_id, Some_Db_PID)->
 
 get_location(Pack_id, Some_Db_PID)->
     io:format("PackID: ~p~n", [Pack_id]),
+    io:format("Get Package Location: ~p~n", [riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id)]),
     case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Fetched} ->
             io:format("Fetched: ~p~n", [Fetched]),
