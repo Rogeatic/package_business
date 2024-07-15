@@ -36,6 +36,7 @@ get_location(Pack_id, Some_Db_PID)->
             io:format("Fetched: ~p~n", [Fetched]),
             {Location_id,_} = binary_to_term(riakc_obj:get_value(Fetched)),
             io:format("Location ID: ~p~n", [Location_id]),
+            io:format(" Get Location Bucket: ~p~n", [riakc_pb_socket:get(Some_Db_PID, <<"locations">>, Location_id)]),
             case riakc_pb_socket:get(Some_Db_PID, <<"locations">>, Location_id) of
             {ok, Loc_obj} ->
                 {Long, Lat} = binary_to_term(riakc_obj:get_value(Loc_obj)),
