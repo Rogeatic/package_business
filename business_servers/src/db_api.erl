@@ -7,7 +7,8 @@ store_location_id(Pack_id, Loc_id, Some_Db_PID)->
     io:format("Request:~p~n", [Request]),
     case riakc_pb_socket:put(Some_Db_PID, Request) of 
         ok ->
-            io:format("Get Value StoreLoc:~p~n", [riakc_obj:get_value(riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id))]),
+            {_, Real} = riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id),
+            io:format("Get Value StoreLoc:~p~n", [riakc_obj:get_value(Real)]),
             worked;
         _ -> fail
     end.
