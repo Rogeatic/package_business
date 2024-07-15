@@ -111,9 +111,10 @@ handle_call({delivered, Pack_id}, _Some_from_pid, Some_Db_PID) ->
 
 % GET LOCATION
 handle_call({location_request, Pack_id}, _Some_from_pid, Some_Db_PID) ->
-    case is_binary(Pack_id) == false of
-    true -> {reply, fail, Some_Db_PID};
-    false ->
+    case is_binary(Pack_id) of
+    false -> {reply, fail, Some_Db_PID};
+    true ->
+        io:format("Get Location Request: ~p~n", [db_api:get_location(Pack_id, Some_Db_PID)]),
         {reply, db_api:get_location(Pack_id, Some_Db_PID), Some_Db_PID}
     end;
 
