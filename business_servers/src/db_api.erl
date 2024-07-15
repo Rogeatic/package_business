@@ -26,7 +26,9 @@ delivered(Pack_id, Some_Db_PID)->
 get_location(Pack_id, Some_Db_PID)->
     case riakc_pb_socket:get(Some_Db_PID, <<"packages">>, Pack_id) of
         {ok, Package} ->
-            {Loc_id, _} = riakc_obj:get_value(Package),
+            Something = riakc_obj:get_value(Package),
+            io:format("~p~n", [Something]),
+            %            {Loc_id, _} = riakc_obj:get_value(Package),
             case riakc_pb_socket:get(<<"locations">>, Loc_id) of
             {ok, Loc_obj} ->
                 {Long, Lat} = riakc_obj:get_value(Loc_obj),
